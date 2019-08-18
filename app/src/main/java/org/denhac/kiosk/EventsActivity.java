@@ -5,13 +5,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 public class EventsActivity extends AppCompatActivity {
@@ -45,8 +44,7 @@ public class EventsActivity extends AppCompatActivity {
         previousMonth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                currentTimestamp.add(Calendar.MONTH, -1);
-                updateView();
+                goToPreviousMonth();
             }
         });
 
@@ -54,11 +52,20 @@ public class EventsActivity extends AppCompatActivity {
         nextMonth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                currentTimestamp.add(Calendar.MONTH, 1);
-                updateView();
+                goToNextMonth();
             }
         });
 
+        updateView();
+    }
+
+    private void goToNextMonth() {
+        currentTimestamp.add(Calendar.MONTH, 1);
+        updateView();
+    }
+
+    private void goToPreviousMonth() {
+        currentTimestamp.add(Calendar.MONTH, -1);
         updateView();
     }
 
