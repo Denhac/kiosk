@@ -17,14 +17,14 @@
         android:textColor="@color/black"
         android:background="@drawable/calendar_item_title"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/list_view"
+        app:layout_constraintBottom_toTopOf="@+id/events_list"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <ListView
-        android:id="@+id/list_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/events_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

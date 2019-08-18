@@ -67,5 +67,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_bar"
         app:layout_constraintVertical_weight="1"
-        tools:context=".EventsActivity" />
+        tools:context=".EventsActivity"
+        android:overScrollMode="never"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

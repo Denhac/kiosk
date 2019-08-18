@@ -5,21 +5,18 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHolder> {
@@ -99,28 +96,40 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ListView listView;
+        private RecyclerView eventsList;
         private ConstraintLayout calendarItem;
-        private int viewType;
         private TextView titleView;
+        private Disposable disposable;
 
         public ViewHolder(View itemView, int viewType) {
             super(itemView);
 
-            this.viewType = viewType;
             titleView = itemView.findViewById(R.id.title);
             calendarItem = itemView.findViewById(R.id.calendar_item);
             if (viewType == VIEW_TYPE_DAY) {
-                listView = itemView.findViewById(R.id.list_view);
-                if (listView.getAdapter() == null) {
-                    ListItemAdapter adapter = new ListItemAdapter();
-                    listView.setAdapter(adapter);
-                }
+                eventsList = itemView.findViewById(R.id.events_list);
+                eventsList.setAdapter(new EventListAdapter());
+                eventsList.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             }
         }
 
         public void setDate(Calendar currentDate) {
-            ((ListItemAdapter) listView.getAdapter()).update(currentDate);
+            if(disposable != null) {
+                disposable.dispose();
+            }
+
+            if(eventsList.getAdapter() != null) {
+                disposable = meetupRepository.fetchEvents(currentDate)
+                        .subscribe(new Consumer<List<Event>>() {
+                            @Override
+                            public void accept(List<Event> events) {
+                                ((EventListAdapter) eventsList.getAdapter())
+                                        .setEvents(events);
+                            }
+                        });
+
+            }
+
             if(DateUtils.isToday(currentDate.getTimeInMillis())) {
                 titleView.setBackgroundResource(R.drawable.calendar_item_title_filled);
                 titleView.setTextColor(ContextCompat.getColor(titleView.getContext(), R.color.white));
@@ -133,72 +142,6 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
 
         public void setVisibility(int visible) {
             calendarItem.setVisibility(visible);
-        }
-    }
-
-    public class ListItemAdapter extends BaseAdapter {
-        private CompositeDisposable disposable;
-        private List<Event> eventList = Collections.emptyList();
-
-        public void update(Calendar currentDay) {
-            if (disposable != null) {
-                disposable.dispose();
-            }
-
-            eventList = Collections.emptyList();
-            disposable = new CompositeDisposable();
-            disposable.add(
-                    meetupRepository.fetchEvents(currentDay)
-                            .subscribe(new Consumer<List<Event>>() {
-                                @Override
-                                public void accept(List<Event> events) {
-                                    eventList = events;
-                                    notifyDataSetChanged();
-                                }
-                            })
-            );
-        }
-
-        @Override
-        public int getCount() {
-            return eventList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return "";
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View view, ViewGroup viewGroup) {
-            if (view == null) {
-                view = LayoutInflater.from(viewGroup.getContext())
-                        .inflate(R.layout.calendar_list_item, viewGroup, false);
-            }
-
-            if (eventList.size() <= position) {
-                return view;
-            }
-
-            final Event event = eventList.get(position);
-            ((TextView) view.findViewById(R.id.meeting_time)).setText(event.getLocalTime());
-            ((TextView) view.findViewById(R.id.meeting_name)).setText(event.getName());
-            String yesRSVPCount = event.getYesRSVPCount();
-            ((TextView) view.findViewById(R.id.meeting_yes_rsvp)).setText(yesRSVPCount + " attendee" + (yesRSVPCount == "1" ? "" : "s"));
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(view.getContext(), event.getDescription(), Toast.LENGTH_LONG).show();;
-                }
-            });
-
-            return view;
         }
     }
 }
