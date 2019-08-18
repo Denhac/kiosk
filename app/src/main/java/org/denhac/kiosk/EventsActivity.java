@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class EventsActivity extends AppCompatActivity {
@@ -24,11 +25,18 @@ public class EventsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events);
 
+        // Get the current day/time but set it to the first day of the month to avoid issues when switching months
         currentTimestamp = Calendar.getInstance();
+        currentTimestamp.set(Calendar.DAY_OF_MONTH, currentTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
+        // TODO just for debug
+        currentTimestamp.set(Calendar.MONTH, 2);
+
         monthText = findViewById(R.id.month_title_bar);
         RecyclerView recyclerView = findViewById(R.id.calendar_recycler_view);
 
-        calendarAdapter = new CalendarAdapter(currentTimestamp);
+        MeetupRepository meetupRepository = new MeetupRepository();
+
+        calendarAdapter = new CalendarAdapter(meetupRepository, currentTimestamp);
         recyclerView.setAdapter(calendarAdapter);
         GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 7);
         recyclerView.setLayoutManager(layoutManager);
