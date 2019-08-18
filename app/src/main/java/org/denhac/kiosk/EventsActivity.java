@@ -1,23 +1,31 @@
 package org.denhac.kiosk;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class EventsActivity extends AppCompatActivity {
 
     private TextView monthText;
     private Calendar currentTimestamp;
     private CalendarAdapter calendarAdapter;
+    private MeetupRepository meetupRepository;
+    private Disposable intervalDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +36,14 @@ public class EventsActivity extends AppCompatActivity {
         currentTimestamp = Calendar.getInstance();
         currentTimestamp.set(Calendar.DAY_OF_MONTH, currentTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
         // TODO just for debug
-        currentTimestamp.set(Calendar.MONTH, 2);
+//        currentTimestamp.set(Calendar.MONTH, 2);
 
         monthText = findViewById(R.id.month_title_bar);
         RecyclerView recyclerView = findViewById(R.id.calendar_recycler_view);
 
-        MeetupRepository meetupRepository = new MeetupRepository();
+        meetupRepository = new MeetupRepository();
 
-        calendarAdapter = new CalendarAdapter(meetupRepository, currentTimestamp);
+        calendarAdapter = new CalendarAdapter(meetupRepository, (Calendar) currentTimestamp.clone());
         recyclerView.setAdapter(calendarAdapter);
         GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 7);
         recyclerView.setLayoutManager(layoutManager);
@@ -57,6 +65,18 @@ public class EventsActivity extends AppCompatActivity {
         });
 
         updateView();
+
+        intervalDisposable = Observable.interval(10, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long unused) {
+                        // TODO handle day change
+                        meetupRepository.fetchEventsForYear(currentTimestamp.get(Calendar.YEAR));
+                        updateView();
+                    }
+                });
     }
 
     private void goToNextMonth() {
@@ -70,7 +90,7 @@ public class EventsActivity extends AppCompatActivity {
     }
 
     private void updateView() {
-        calendarAdapter.setTimestamp(currentTimestamp);
+        calendarAdapter.setTimestamp((Calendar) currentTimestamp.clone());
         if(monthText != null) {
             String monthName = currentTimestamp.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
             int year = currentTimestamp.get(Calendar.YEAR);

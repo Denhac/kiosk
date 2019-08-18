@@ -38,15 +38,15 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         LayoutInflater inflater = LayoutInflater.from(context);
 
         // Inflate the custom layout
-        View contactView;
+        View calendarItemView;
         if (viewType == VIEW_TYPE_DAY) {
-            contactView = inflater.inflate(R.layout.calendar_item, parent, false);
+            calendarItemView = inflater.inflate(R.layout.calendar_item, parent, false);
         } else {
-            contactView = inflater.inflate(R.layout.calendar_header, parent, false);
+            calendarItemView = inflater.inflate(R.layout.calendar_header, parent, false);
         }
 
         // Return a new holder instance
-        return new ViewHolder(contactView, viewType);
+        return new ViewHolder(calendarItemView, viewType);
     }
 
     @Override
@@ -87,9 +87,15 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         return 44;
     }
 
-    public void setTimestamp(Calendar currentTimestamp) {
-        currentTimestamp.set(Calendar.DAY_OF_MONTH, currentTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
-        this.currentTimestamp = currentTimestamp;
+    public void setTimestamp(Calendar newTimestamp) {
+        newTimestamp.set(Calendar.DAY_OF_MONTH, newTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
+
+        if (this.currentTimestamp != null &&
+                newTimestamp.get(Calendar.YEAR) == this.currentTimestamp.get(Calendar.YEAR) &&
+                newTimestamp.get(Calendar.MONTH) == this.currentTimestamp.get(Calendar.MONTH)) {
+            return;
+        }
+        this.currentTimestamp = newTimestamp;
 
         notifyDataSetChanged();
     }
@@ -114,11 +120,11 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         }
 
         public void setDate(Calendar currentDate) {
-            if(disposable != null) {
+            if (disposable != null) {
                 disposable.dispose();
             }
 
-            if(eventsList.getAdapter() != null) {
+            if (eventsList.getAdapter() != null) {
                 disposable = meetupRepository.fetchEvents(currentDate)
                         .subscribe(new Consumer<List<Event>>() {
                             @Override
@@ -130,7 +136,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
 
             }
 
-            if(DateUtils.isToday(currentDate.getTimeInMillis())) {
+            if (DateUtils.isToday(currentDate.getTimeInMillis())) {
                 titleView.setBackgroundResource(R.drawable.calendar_item_title_filled);
                 titleView.setTextColor(ContextCompat.getColor(titleView.getContext(), R.color.white));
             }

@@ -17,8 +17,19 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
     private List<Event> events = Collections.emptyList();
 
     public void setEvents(List<Event> events) {
+        List<Event> oldEvents = this.events;
         this.events = events;
-        notifyDataSetChanged();
+
+        if(oldEvents.size() != events.size()) {
+            notifyDataSetChanged();
+            return;
+        }
+
+        for (int i = 0; i < oldEvents.size(); i++) {
+            if(! oldEvents.get(i).equals(events.get(i))) {
+                notifyItemChanged(i);
+            }
+        }
     }
 
     @NonNull
@@ -64,7 +75,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
             meetingTimeView.setText(event.getLocalTime());
             meetingNameView.setText(event.getName());
             String yesRSVPCount = event.getYesRSVPCount();
-            meetingYesRSVP.setText(yesRSVPCount + " attendee" + (yesRSVPCount == "1" ? "" : "s"));
+            meetingYesRSVP.setText(yesRSVPCount + " attendee" + (yesRSVPCount.equals("1") ? "" : "s"));
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -50,7 +50,7 @@ public class MeetupRepository {
         fetchEventsForYear(currentYear);
     }
 
-    private void fetchEventsForYear(int currentYear) {
+    public void fetchEventsForYear(int currentYear) {
         Disposable currentDisposable = yearToGetEvents.get(currentYear);
         if (yearToExpiredTime.get(currentYear, 0L) > SystemClock.elapsedRealtime()) {
             return;
