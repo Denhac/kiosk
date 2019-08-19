@@ -139,6 +139,9 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
             if (DateUtils.isToday(currentDate.getTimeInMillis())) {
                 titleView.setBackgroundResource(R.drawable.calendar_item_title_filled);
                 titleView.setTextColor(ContextCompat.getColor(titleView.getContext(), R.color.white));
+            } else {
+                titleView.setBackgroundResource(R.drawable.calendar_item_title);
+                titleView.setTextColor(ContextCompat.getColor(titleView.getContext(), R.color.black));
             }
         }
 
