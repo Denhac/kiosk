@@ -24,6 +24,7 @@ public class EventsActivity extends AppCompatActivity {
 
     private TextView monthText;
     private Calendar currentDay;
+    private Calendar currentViewedMonth;
     private CalendarAdapter calendarAdapter;
     private MeetupRepository meetupRepository;
     private Disposable intervalDisposable;
@@ -34,13 +35,15 @@ public class EventsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_events);
 
         currentDay = Calendar.getInstance();
+        currentViewedMonth = (Calendar) currentDay.clone();
+        currentViewedMonth.set(Calendar.DAY_OF_MONTH, currentViewedMonth.getActualMinimum(Calendar.DAY_OF_MONTH));
 
         monthText = findViewById(R.id.month_title_bar);
         RecyclerView recyclerView = findViewById(R.id.calendar_recycler_view);
 
         meetupRepository = new MeetupRepository();
 
-        calendarAdapter = new CalendarAdapter(meetupRepository, (Calendar) currentDay.clone());
+        calendarAdapter = new CalendarAdapter(meetupRepository, (Calendar) currentViewedMonth.clone());
         recyclerView.setAdapter(calendarAdapter);
         GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 7);
         recyclerView.setLayoutManager(layoutManager);
@@ -61,7 +64,7 @@ public class EventsActivity extends AppCompatActivity {
             }
         });
 
-        updateView(currentDay);
+        updateView();
 
         intervalDisposable = Observable.interval(10, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.newThread())
@@ -69,13 +72,22 @@ public class EventsActivity extends AppCompatActivity {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long unused) {
-                        currentDay = Calendar.getInstance();
-                        if(!DateUtils.isToday(currentDay.getTimeInMillis())) {
-                            updateView(currentDay);
-                            calendarAdapter.notifyDataSetChanged();
+                        if (!DateUtils.isToday(currentDay.getTimeInMillis())) {
+                            Calendar newDay = Calendar.getInstance();
+                            boolean currentDayIsViewable = currentDay.get(Calendar.YEAR) == currentViewedMonth.get(Calendar.YEAR) &&
+                                    currentDay.get(Calendar.MONTH) == currentViewedMonth.get(Calendar.MONTH);
+                            boolean newDayIsViewable = newDay.get(Calendar.YEAR) == currentViewedMonth.get(Calendar.YEAR) &&
+                                    newDay.get(Calendar.MONTH) == currentViewedMonth.get(Calendar.MONTH);
+                            if (currentDayIsViewable || newDayIsViewable) {
+                                currentDay = newDay;
+                                currentViewedMonth = (Calendar) currentDay.clone();
+                                currentViewedMonth.set(Calendar.DAY_OF_MONTH, currentViewedMonth.getActualMinimum(Calendar.DAY_OF_MONTH));
+                                updateView();
+                                calendarAdapter.notifyDataSetChanged();
+                            }
                         }
+
                         meetupRepository.fetchEventsForYear(currentDay.get(Calendar.YEAR));
-                        updateView(currentDay);
                     }
                 });
     }
@@ -88,27 +100,20 @@ public class EventsActivity extends AppCompatActivity {
     }
 
     private void goToNextMonth() {
-        Calendar monthTimestamp = (Calendar) currentDay.clone();
-        monthTimestamp.set(Calendar.DAY_OF_MONTH, monthTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
-        monthTimestamp.add(Calendar.MONTH, 1);
-        updateView(monthTimestamp);
+        currentViewedMonth.add(Calendar.MONTH, 1);
+        updateView();
     }
 
     private void goToPreviousMonth() {
-        Calendar monthTimestamp = (Calendar) currentDay.clone();
-        monthTimestamp.set(Calendar.DAY_OF_MONTH, monthTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
-        monthTimestamp.add(Calendar.MONTH, 1);
-        updateView(monthTimestamp);
+        currentViewedMonth.add(Calendar.MONTH, -1);
+        updateView();
     }
 
-    private void updateView(Calendar monthTimestamp) {
-        monthTimestamp = (Calendar) monthTimestamp.clone();
-        monthTimestamp.set(Calendar.DAY_OF_MONTH, monthTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
-
-        calendarAdapter.setTimestamp(monthTimestamp);
+    private void updateView() {
+        calendarAdapter.setCurrentlyViewedMonth((Calendar) currentViewedMonth.clone());
         if (monthText != null) {
-            String monthName = monthTimestamp.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-            int year = monthTimestamp.get(Calendar.YEAR);
+            String monthName = currentViewedMonth.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
+            int year = currentViewedMonth.get(Calendar.YEAR);
             monthText.setText(monthName + " " + year);
         }
     }

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.disposables.Disposable;
@@ -24,11 +25,11 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
     private static final int VIEW_TYPE_DAY = 1;
 
     private final MeetupRepository meetupRepository;
-    private Calendar currentTimestamp;
+    private Calendar currentlyViewedMonth;
 
-    public CalendarAdapter(MeetupRepository meetupRepository, Calendar currentTimestamp) {
+    public CalendarAdapter(MeetupRepository meetupRepository, Calendar currentlyViewedMonth) {
         this.meetupRepository = meetupRepository;
-        setTimestamp(currentTimestamp);
+        setCurrentlyViewedMonth(currentlyViewedMonth);
     }
 
     @NonNull
@@ -58,12 +59,12 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
             return;
         }
 
-        int startPosition = currentTimestamp.get(Calendar.DAY_OF_WEEK) - 1 + 7;
-        int stopPosition = startPosition + currentTimestamp.getActualMaximum(Calendar.DAY_OF_MONTH) - 1;
+        int startPosition = currentlyViewedMonth.get(Calendar.DAY_OF_WEEK) - 1 + 7;
+        int stopPosition = startPosition + currentlyViewedMonth.getActualMaximum(Calendar.DAY_OF_MONTH) - 1;
 
         if (position >= startPosition && position <= stopPosition) {
             int dayNumber = position - startPosition + 1;
-            Calendar currentDay = (Calendar) currentTimestamp.clone();
+            Calendar currentDay = (Calendar) currentlyViewedMonth.clone();
             currentDay.set(Calendar.DAY_OF_MONTH, dayNumber);
 
             holder.setVisibility(View.VISIBLE);
@@ -87,15 +88,15 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         return 44;
     }
 
-    public void setTimestamp(Calendar newTimestamp) {
+    public void setCurrentlyViewedMonth(Calendar newTimestamp) {
         newTimestamp.set(Calendar.DAY_OF_MONTH, newTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
-
-        if (this.currentTimestamp != null &&
-                newTimestamp.get(Calendar.YEAR) == this.currentTimestamp.get(Calendar.YEAR) &&
-                newTimestamp.get(Calendar.MONTH) == this.currentTimestamp.get(Calendar.MONTH)) {
-            return;
-        }
-        this.currentTimestamp = newTimestamp;
+//
+//        if (this.currentlyViewedMonth != null &&
+//                newTimestamp.get(Calendar.YEAR) == this.currentlyViewedMonth.get(Calendar.YEAR) &&
+//                newTimestamp.get(Calendar.MONTH) == this.currentlyViewedMonth.get(Calendar.MONTH)) {
+//            return;
+//        }
+        this.currentlyViewedMonth = newTimestamp;
 
         notifyDataSetChanged();
     }
@@ -120,20 +121,20 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         }
 
         public void setDate(Calendar currentDate) {
+            final EventListAdapter adapter = (EventListAdapter) eventsList.getAdapter();
             if (disposable != null) {
                 disposable.dispose();
             }
 
-            if (eventsList.getAdapter() != null) {
+            if (adapter != null) {
+                adapter.setEvents(Collections.<Event>emptyList());
                 disposable = meetupRepository.fetchEvents(currentDate)
                         .subscribe(new Consumer<List<Event>>() {
                             @Override
                             public void accept(List<Event> events) {
-                                ((EventListAdapter) eventsList.getAdapter())
-                                        .setEvents(events);
+                                adapter.setEvents(events);
                             }
                         });
-
             }
 
             if (DateUtils.isToday(currentDate.getTimeInMillis())) {

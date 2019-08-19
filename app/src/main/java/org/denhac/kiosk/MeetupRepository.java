@@ -27,12 +27,12 @@ import retrofit2.http.Query;
 
 public class MeetupRepository {
     private final MeetupService service;
-    private final ReplaySubject<List<Event>> newEvents;
+    private final SparseArray<ReplaySubject<List<Event>>> yearToNewEvents;
     private final SparseArray<Disposable> yearToGetEvents;
     private final SparseArray<Long> yearToExpiredTime;
 
     public MeetupRepository() {
-        newEvents = ReplaySubject.createWithSize(1);
+        yearToNewEvents = new SparseArray<>();
         yearToGetEvents = new SparseArray<>();
         yearToExpiredTime = new SparseArray<>();
 
@@ -59,6 +59,13 @@ public class MeetupRepository {
             currentDisposable.dispose();
         }
 
+        if(yearToNewEvents.get(currentYear) == null) {
+            ReplaySubject<List<Event>> subject = ReplaySubject.createWithSize(1);
+            yearToNewEvents.put(currentYear, subject);
+        }
+
+        final ReplaySubject<List<Event>> replaySubject = yearToNewEvents.get(currentYear);
+
         Disposable disposable = service
                 .events("denhac-hackerspace",
                         currentYear + "-01-01T00:00:00.000",
@@ -67,7 +74,7 @@ public class MeetupRepository {
                 .subscribe(new Consumer<List<Event>>() {
                     @Override
                     public void accept(List<Event> events) {
-                        newEvents.onNext(events);
+                        replaySubject.onNext(events);
                     }
                 });
 
@@ -81,7 +88,7 @@ public class MeetupRepository {
         SimpleDateFormat yearMonthDay = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         final String currentDayAsString = yearMonthDay.format(timestamp.getTime());
 
-        return newEvents
+        return yearToNewEvents.get(timestamp.get(Calendar.YEAR))
                 .subscribeOn(Schedulers.io())
                 .map(new Function<List<Event>, List<Event>>() {
                     @Override
@@ -102,7 +109,7 @@ public class MeetupRepository {
 }
 
 interface MeetupService {
-    @GET("{group}/events?status=past,upcoming")
+    @GET("{group}/events?status=past,upcoming&page=1000")
     Single<List<Event>> events(@Path("group") String groupName,
                                @Query("no_earlier_than") String noEarlierThan,
                                @Query("no_later_than") String noLaterThan);
