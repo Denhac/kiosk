@@ -31,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
         waiverGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Sorry, that's not implemented yet!", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), ReleaseFormActivity.class);
+                startActivity(intent);
             }
         });
     }
