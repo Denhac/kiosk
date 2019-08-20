@@ -1,15 +1,12 @@
 package org.denhac.kiosk;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,19 +42,5 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-
-        ActivityManager activityManager = (ActivityManager) getApplicationContext()
-                .getSystemService(Context.ACTIVITY_SERVICE);
-
-        activityManager.moveTaskToFront(getTaskId(), 0);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_HOME) {
-            Toast.makeText(getApplicationContext(),"kiosk mode", Toast.LENGTH_LONG).show();
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 }
