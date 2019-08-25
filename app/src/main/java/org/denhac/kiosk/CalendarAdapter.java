@@ -25,10 +25,12 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
     private static final int VIEW_TYPE_DAY = 1;
 
     private final MeetupRepository meetupRepository;
+    private PopupWindowManager popupWindowManager;
     private Calendar currentlyViewedMonth;
 
-    public CalendarAdapter(MeetupRepository meetupRepository, Calendar currentlyViewedMonth) {
+    public CalendarAdapter(MeetupRepository meetupRepository, PopupWindowManager popupWindowManager, Calendar currentlyViewedMonth) {
         this.meetupRepository = meetupRepository;
+        this.popupWindowManager = popupWindowManager;
         setCurrentlyViewedMonth(currentlyViewedMonth);
     }
 
@@ -47,7 +49,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         }
 
         // Return a new holder instance
-        return new ViewHolder(calendarItemView, viewType);
+        return new ViewHolder(calendarItemView, viewType, popupWindowManager);
     }
 
     @Override
@@ -108,14 +110,14 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         private TextView titleView;
         private Disposable disposable;
 
-        public ViewHolder(View itemView, int viewType) {
+        public ViewHolder(View itemView, int viewType, PopupWindowManager popupWindowManager) {
             super(itemView);
 
             titleView = itemView.findViewById(R.id.title);
             calendarItem = itemView.findViewById(R.id.calendar_item);
             if (viewType == VIEW_TYPE_DAY) {
                 eventsList = itemView.findViewById(R.id.events_list);
-                eventsList.setAdapter(new EventListAdapter());
+                eventsList.setAdapter(new EventListAdapter(popupWindowManager));
                 eventsList.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             }
         }

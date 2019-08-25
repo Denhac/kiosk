@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +14,11 @@ import java.util.List;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
     private List<Event> events = Collections.emptyList();
+    private PopupWindowManager popupWindowManager;
+
+    public EventListAdapter(PopupWindowManager popupWindowManager) {
+        this.popupWindowManager = popupWindowManager;
+    }
 
     public void setEvents(List<Event> events) {
         List<Event> oldEvents = this.events;
@@ -42,7 +46,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         View listView = inflater.inflate(R.layout.calendar_list_item, parent, false);
 
         // Return a new holder instance
-        return new EventListAdapter.ViewHolder(listView);
+        return new EventListAdapter.ViewHolder(listView, popupWindowManager);
     }
 
     @Override
@@ -60,15 +64,17 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         private final TextView meetingTimeView;
         private final TextView meetingNameView;
         private final TextView meetingYesRSVP;
+        private PopupWindowManager popupWindowManager;
 
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(View itemView, PopupWindowManager popupWindowManager) {
             super(itemView);
 
             this.itemView = itemView;
             meetingTimeView = itemView.findViewById(R.id.meeting_time);
             meetingNameView = itemView.findViewById(R.id.meeting_name);
             meetingYesRSVP = itemView.findViewById(R.id.meeting_yes_rsvp);
+            this.popupWindowManager = popupWindowManager;
         }
 
         public void bind(final Event event) {
@@ -80,7 +86,8 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(view.getContext(), event.getDescription(), Toast.LENGTH_LONG).show();;
+//                    Toast.makeText(view.getContext(), event.getDescription(), Toast.LENGTH_LONG).show();
+                    popupWindowManager.open(event);
                 }
             });
         }
