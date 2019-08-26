@@ -3,7 +3,6 @@ package org.denhac.kiosk;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.format.DateUtils;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -23,7 +21,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class EventsActivity extends AppCompatActivity {
+public class EventsActivity extends AppCompatActivity implements MeetupRepository.NetworkStatus {
 
     private TextView monthText;
     private Calendar currentDay;
@@ -34,6 +32,7 @@ public class EventsActivity extends AppCompatActivity {
     private ImageView previousMonth;
     private ImageView nextMonth;
     private CalendarView calendarView;
+    private TextView offlineTextView;
 
     private PopupWindowManager popupWindowManager;
     private ConstraintLayout popupWindow;
@@ -53,7 +52,7 @@ public class EventsActivity extends AppCompatActivity {
         monthText = findViewById(R.id.month_title_bar);
         calendarView = findViewById(R.id.calendar_recycler_view);
 
-        meetupRepository = new MeetupRepository();
+        meetupRepository = new MeetupRepository(this);
 
         popupWindow = findViewById(R.id.popup_window);
         popupWindowManager = getPopupWindowManager();
@@ -78,6 +77,8 @@ public class EventsActivity extends AppCompatActivity {
                 goToNextMonth();
             }
         });
+
+        offlineTextView = findViewById(R.id.offline_text);
 
         popupExitButton = findViewById(R.id.popup_window_exit_button);
         popupExitButton.setOnClickListener(new View.OnClickListener() {
@@ -166,5 +167,19 @@ public class EventsActivity extends AppCompatActivity {
             int year = currentViewedMonth.get(Calendar.YEAR);
             monthText.setText(monthName + " " + year);
         }
+    }
+
+    @Override
+    public void notifyStatus(final boolean online) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(online) {
+                    offlineTextView.setVisibility(View.INVISIBLE);
+                } else {
+                    offlineTextView.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 }

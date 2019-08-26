@@ -30,8 +30,10 @@ public class MeetupRepository {
     private final SparseArray<ReplaySubject<List<Event>>> yearToNewEvents;
     private final SparseArray<Disposable> yearToGetEvents;
     private final SparseArray<Long> yearToExpiredTime;
+    private final NetworkStatus networkStatus;
 
-    public MeetupRepository() {
+    public MeetupRepository(NetworkStatus networkStatus) {
+        this.networkStatus = networkStatus;
         yearToNewEvents = new SparseArray<>();
         yearToGetEvents = new SparseArray<>();
         yearToExpiredTime = new SparseArray<>();
@@ -55,11 +57,11 @@ public class MeetupRepository {
         if (yearToExpiredTime.get(currentYear, 0L) > SystemClock.elapsedRealtime()) {
             return;
         }
-        if(currentDisposable != null) {
+        if (currentDisposable != null) {
             currentDisposable.dispose();
         }
 
-        if(yearToNewEvents.get(currentYear) == null) {
+        if (yearToNewEvents.get(currentYear) == null) {
             ReplaySubject<List<Event>> subject = ReplaySubject.createWithSize(1);
             yearToNewEvents.put(currentYear, subject);
         }
@@ -74,7 +76,13 @@ public class MeetupRepository {
                 .subscribe(new Consumer<List<Event>>() {
                     @Override
                     public void accept(List<Event> events) {
+                        networkStatus.notifyStatus(true);
                         replaySubject.onNext(events);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        networkStatus.notifyStatus(false);
                     }
                 });
 
@@ -105,6 +113,10 @@ public class MeetupRepository {
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    interface NetworkStatus {
+        void notifyStatus(boolean online);
     }
 }
 
