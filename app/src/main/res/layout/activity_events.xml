@@ -124,7 +124,7 @@
             android:textAlignment="textStart"
             android:textColor="@color/black"
             android:textSize="36sp"
-            app:layout_constraintEnd_toEndOf="@+id/popup_window_exit_button"
+            app:layout_constraintEnd_toStartOf="@+id/popup_window_exit_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
