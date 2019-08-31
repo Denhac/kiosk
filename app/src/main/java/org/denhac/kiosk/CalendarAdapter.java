@@ -13,6 +13,10 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.denhac.kiosk.meetup.Event;
+import org.denhac.kiosk.meetup.MeetupRepository;
+import org.denhac.kiosk.popup.PopupWindowManager;
+
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -92,12 +96,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
 
     public void setCurrentlyViewedMonth(Calendar newTimestamp) {
         newTimestamp.set(Calendar.DAY_OF_MONTH, newTimestamp.getActualMinimum(Calendar.DAY_OF_MONTH));
-//
-//        if (this.currentlyViewedMonth != null &&
-//                newTimestamp.get(Calendar.YEAR) == this.currentlyViewedMonth.get(Calendar.YEAR) &&
-//                newTimestamp.get(Calendar.MONTH) == this.currentlyViewedMonth.get(Calendar.MONTH)) {
-//            return;
-//        }
+
         this.currentlyViewedMonth = newTimestamp;
 
         notifyDataSetChanged();

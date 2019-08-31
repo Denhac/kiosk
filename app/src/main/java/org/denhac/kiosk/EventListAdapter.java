@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.denhac.kiosk.meetup.Event;
+import org.denhac.kiosk.popup.PopupWindowManager;
+
 import java.util.Collections;
 import java.util.List;
 

@@ -1,9 +1,7 @@
-package org.denhac.kiosk;
+package org.denhac.kiosk.meetup;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
-import java.util.Objects;
 
 public class Event {
     @Expose
@@ -29,6 +27,10 @@ public class Event {
     @Expose
     @SerializedName("description")
     private String description;
+
+    public String getId() {
+        return id;
+    }
 
     public String getName() {
         return name;

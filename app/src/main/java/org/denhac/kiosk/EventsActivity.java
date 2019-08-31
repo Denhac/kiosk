@@ -3,6 +3,7 @@ package org.denhac.kiosk;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,7 +12,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import org.denhac.kiosk.meetup.Event;
+import org.denhac.kiosk.meetup.EventAttendee;
+import org.denhac.kiosk.meetup.MeetupRepository;
+import org.denhac.kiosk.popup.AttendeeListView;
+import org.denhac.kiosk.popup.PopupWindowManager;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +37,6 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
     private Calendar currentViewedMonth;
     private CalendarAdapter calendarAdapter;
     private MeetupRepository meetupRepository;
-    private Disposable intervalDisposable;
     private ImageView previousMonth;
     private ImageView nextMonth;
     private CalendarView calendarView;
@@ -36,9 +44,14 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
 
     private PopupWindowManager popupWindowManager;
     private ConstraintLayout popupWindow;
+    private AttendeeListView hostListView;
+    private AttendeeListView attendeeListView;
     private ImageView popupExitButton;
     private TextView popupEventTitle;
     private TextView popupEventDescription;
+
+    private Disposable intervalDisposable;
+    private Disposable fetchAttendeesDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +108,9 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
 
         popupEventTitle = findViewById(R.id.popup_event_title);
 
+        hostListView = findViewById(R.id.hosts_list_view);
+        attendeeListView = findViewById(R.id.attendees_list_view);
+
         updateView();
 
         intervalDisposable = getUpdateInterval();
@@ -132,20 +148,56 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
         super.onDestroy();
 
         intervalDisposable.dispose();
+        fetchAttendeesDisposable.dispose();
     }
 
     private PopupWindowManager getPopupWindowManager() {
         return new PopupWindowManager() {
             @Override
-            public void open(Event e) {
-                popupEventTitle.setText(e.getName());
-                String description = Html.fromHtml(e.getDescription()).toString();
+            public void open(final Event event) {
+                popupEventTitle.setText(event.getName());
+                String description = Html.fromHtml(event.getDescription()).toString();
                 popupEventDescription.setText(description);
 
-                popupWindow.setVisibility(View.VISIBLE);
                 previousMonth.setClickable(false);
                 nextMonth.setClickable(false);
                 calendarView.setTouchEnabled(false);
+
+                if (fetchAttendeesDisposable != null) {
+                    fetchAttendeesDisposable.dispose();
+                }
+
+                hostListView.getAttendeeAdapter().clear();
+                attendeeListView.getAttendeeAdapter().clear();
+
+                fetchAttendeesDisposable = meetupRepository.fetchAttendees(event)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Consumer<List<EventAttendee>>() {
+                            @Override
+                            public void accept(List<EventAttendee> allAttendees) {
+                                List<EventAttendee> hosts = new ArrayList<>();
+                                List<EventAttendee> attendees = new ArrayList<>();
+                                for (EventAttendee eventAttendee : allAttendees) {
+                                    if (eventAttendee.isHost() && eventAttendee.isAttending()) {
+                                        hosts.add(eventAttendee);
+                                    }
+
+                                    if (! eventAttendee.isHost() && eventAttendee.isAttending()) {
+                                        attendees.add(eventAttendee);
+                                    }
+                                }
+
+                                hostListView.getAttendeeAdapter().setAttendees(hosts);
+                                attendeeListView.getAttendeeAdapter().setAttendees(attendees);
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) throws Exception {
+                                Log.e("EXCEPTION", "some exception", throwable);
+                            }
+                        });
+
+                popupWindow.setVisibility(View.VISIBLE);
             }
         };
     }
@@ -174,7 +226,7 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(online) {
+                if (online) {
                     offlineTextView.setVisibility(View.INVISIBLE);
                 } else {
                     offlineTextView.setVisibility(View.VISIBLE);

@@ -1,4 +1,4 @@
-package org.denhac.kiosk;
+package org.denhac.kiosk.meetup;
 
 import android.os.SystemClock;
 import android.util.SparseArray;
@@ -21,11 +21,9 @@ import io.reactivex.subjects.ReplaySubject;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
 
 public class MeetupRepository {
+    public static final String DENHAC_HACKERSPACE = "denhac-hackerspace";
     private final MeetupService service;
     private final SparseArray<ReplaySubject<List<Event>>> yearToNewEvents;
     private final SparseArray<Disposable> yearToGetEvents;
@@ -69,7 +67,7 @@ public class MeetupRepository {
         final ReplaySubject<List<Event>> replaySubject = yearToNewEvents.get(currentYear);
 
         Disposable disposable = service
-                .events("denhac-hackerspace",
+                .events(DENHAC_HACKERSPACE,
                         currentYear + "-01-01T00:00:00.000",
                         (currentYear + 1) + "-01-01T00:00:00.000")
                 .subscribeOn(Schedulers.io())
@@ -115,15 +113,12 @@ public class MeetupRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    interface NetworkStatus {
+    public Single<List<EventAttendee>> fetchAttendees(Event event) {
+        return service.eventAttendees(DENHAC_HACKERSPACE, event.getId())
+                .subscribeOn(Schedulers.io());
+    }
+
+    public interface NetworkStatus {
         void notifyStatus(boolean online);
     }
 }
-
-interface MeetupService {
-    @GET("{group}/events?status=past,upcoming&page=1000")
-    Single<List<Event>> events(@Path("group") String groupName,
-                               @Query("no_earlier_than") String noEarlierThan,
-                               @Query("no_later_than") String noLaterThan);
-}
-
