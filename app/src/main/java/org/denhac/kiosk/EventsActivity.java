@@ -111,6 +111,9 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
         hostListView = findViewById(R.id.hosts_list_view);
         attendeeListView = findViewById(R.id.attendees_list_view);
 
+        hostListView.setMeetupRepository(meetupRepository);
+        attendeeListView.setMeetupRepository(meetupRepository);
+
         updateView();
 
         intervalDisposable = getUpdateInterval();

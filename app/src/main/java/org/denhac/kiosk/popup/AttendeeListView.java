@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.denhac.kiosk.meetup.MeetupRepository;
+
 public class AttendeeListView extends RecyclerView {
     private AttendeeAdapter attendeeAdapter;
 
@@ -29,7 +31,10 @@ public class AttendeeListView extends RecyclerView {
 
     private void init() {
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        attendeeAdapter = new AttendeeAdapter();
+    }
+
+    public void setMeetupRepository(MeetupRepository meetupRepository) {
+        attendeeAdapter = new AttendeeAdapter(meetupRepository);
 
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 5);
 

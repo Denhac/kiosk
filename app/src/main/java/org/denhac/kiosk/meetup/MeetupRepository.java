@@ -1,8 +1,12 @@
 package org.denhac.kiosk.meetup;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseArray;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -17,7 +21,14 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.ReplaySubject;
+import io.reactivex.subjects.SingleSubject;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -29,6 +40,7 @@ public class MeetupRepository {
     private final SparseArray<Disposable> yearToGetEvents;
     private final SparseArray<Long> yearToExpiredTime;
     private final NetworkStatus networkStatus;
+    private final OkHttpClient okHttpClient;
 
     public MeetupRepository(NetworkStatus networkStatus) {
         this.networkStatus = networkStatus;
@@ -43,6 +55,8 @@ public class MeetupRepository {
                 .build();
 
         service = retrofit.create(MeetupService.class);
+
+        okHttpClient = new OkHttpClient();
 
         Calendar instance = Calendar.getInstance();
         int currentYear = instance.get(Calendar.YEAR);
@@ -116,6 +130,32 @@ public class MeetupRepository {
     public Single<List<EventAttendee>> fetchAttendees(Event event) {
         return service.eventAttendees(DENHAC_HACKERSPACE, event.getId())
                 .subscribeOn(Schedulers.io());
+    }
+
+    public Single<byte[]> getImageData(final String photoLink) {
+        final SingleSubject<byte[]> singleSubject = SingleSubject.create();
+
+        Request request = new Request.Builder()
+                .url(photoLink)
+                .build();
+
+        okHttpClient
+                .newCall(request)
+                .enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("CALL", "Request of " + photoLink + " failed", e);
+                singleSubject.onError(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                byte[] bytes = response.body().bytes();
+                singleSubject.onSuccess(bytes);
+            }
+        });
+
+        return singleSubject;
     }
 
     public interface NetworkStatus {
