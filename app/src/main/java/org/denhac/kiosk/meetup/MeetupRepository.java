@@ -61,7 +61,7 @@ public class MeetupRepository {
         fetchEventsForYear(currentYear);
     }
 
-    public void fetchEventsForYear(int currentYear) {
+    public void fetchEventsForYear(final int currentYear) {
         Disposable currentDisposable = yearToGetEvents.get(currentYear);
         if (yearToExpiredTime.get(currentYear, 0L) > SystemClock.elapsedRealtime()) {
             return;
@@ -87,16 +87,20 @@ public class MeetupRepository {
                     public void accept(List<Event> events) {
                         networkStatus.notifyStatus(true);
                         replaySubject.onNext(events);
+
+                        yearToExpiredTime.put(currentYear, SystemClock.elapsedRealtime() + TimeUnit.MINUTES.toMillis(1));
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
                         networkStatus.notifyStatus(false);
+
+                        // Always try again on next request
+                        yearToExpiredTime.remove(currentYear);
                     }
                 });
 
         yearToGetEvents.put(currentYear, disposable);
-        yearToExpiredTime.put(currentYear, SystemClock.elapsedRealtime() + TimeUnit.MINUTES.toMillis(1));
     }
 
     public Observable<List<Event>> fetchEvents(Calendar timestamp) {
