@@ -1,7 +1,5 @@
 package org.denhac.kiosk.meetup;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -21,7 +19,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.SingleSubject;
 import okhttp3.Call;
@@ -127,7 +124,7 @@ public class MeetupRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<List<EventAttendee>> fetchAttendees(Event event) {
+    public Single<List<EventRSVP>> fetchAttendees(Event event) {
         return service.eventAttendees(DENHAC_HACKERSPACE, event.getId())
                 .subscribeOn(Schedulers.io());
     }

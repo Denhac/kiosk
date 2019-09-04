@@ -14,6 +14,6 @@ public interface MeetupService {
                                @Query("no_earlier_than") String noEarlierThan,
                                @Query("no_later_than") String noLaterThan);
 
-    @GET("{group}/events/{id}/attendance")
-    Single<List<EventAttendee>> eventAttendees(@Path("group") String groupName, @Path("id") String eventId);
+    @GET("{group}/events/{id}/rsvps")
+    Single<List<EventRSVP>> eventAttendees(@Path("group") String groupName, @Path("id") String eventId);
 }

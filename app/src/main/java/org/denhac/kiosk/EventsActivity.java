@@ -1,26 +1,19 @@
 package org.denhac.kiosk;
 
 import android.os.Bundle;
-import android.text.Html;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 
-import org.denhac.kiosk.meetup.Event;
-import org.denhac.kiosk.meetup.EventAttendee;
 import org.denhac.kiosk.meetup.MeetupRepository;
-import org.denhac.kiosk.popup.AttendeeListView;
-import org.denhac.kiosk.popup.PopupWindowManager;
+import org.denhac.kiosk.popup.PopupView;
+import org.denhac.kiosk.popup.PopupWindow;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +23,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class EventsActivity extends AppCompatActivity implements MeetupRepository.NetworkStatus {
+public class EventsActivity extends AppCompatActivity implements MeetupRepository.NetworkStatus, PopupWindow.Callback {
 
     private TextView monthText;
     private Calendar currentDay;
@@ -42,16 +35,8 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
     private CalendarView calendarView;
     private TextView offlineTextView;
 
-    private PopupWindowManager popupWindowManager;
-    private ConstraintLayout popupWindow;
-    private AttendeeListView hostListView;
-    private AttendeeListView attendeeListView;
-    private ImageView popupExitButton;
-    private TextView popupEventTitle;
-    private TextView popupEventDescription;
-
     private Disposable intervalDisposable;
-    private Disposable fetchAttendeesDisposable;
+    private PopupView popupView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +52,10 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
 
         meetupRepository = new MeetupRepository(this);
 
-        popupWindow = findViewById(R.id.popup_window);
-        popupWindowManager = getPopupWindowManager();
+        popupView = findViewById(R.id.popup_window);
+        popupView.setup(meetupRepository, this);
 
-        calendarAdapter = new CalendarAdapter(meetupRepository, popupWindowManager, (Calendar) currentViewedMonth.clone());
+        calendarAdapter = new CalendarAdapter(meetupRepository, popupView, (Calendar) currentViewedMonth.clone());
         calendarView.setAdapter(calendarAdapter);
         GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 7);
         calendarView.setLayoutManager(layoutManager);
@@ -92,27 +77,6 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
         });
 
         offlineTextView = findViewById(R.id.offline_text);
-
-        popupExitButton = findViewById(R.id.popup_window_exit_button);
-        popupExitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                popupWindow.setVisibility(View.GONE);
-                previousMonth.setClickable(true);
-                nextMonth.setClickable(true);
-                calendarView.setTouchEnabled(true);
-            }
-        });
-
-        popupEventDescription = findViewById(R.id.popup_event_description);
-
-        popupEventTitle = findViewById(R.id.popup_event_title);
-
-        hostListView = findViewById(R.id.hosts_list_view);
-        attendeeListView = findViewById(R.id.attendees_list_view);
-
-        hostListView.setMeetupRepository(meetupRepository);
-        attendeeListView.setMeetupRepository(meetupRepository);
 
         updateView();
 
@@ -142,6 +106,8 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
                         }
 
                         meetupRepository.fetchEventsForYear(currentDay.get(Calendar.YEAR));
+
+                        popupView.update();
                     }
                 });
     }
@@ -151,58 +117,6 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
         super.onDestroy();
 
         intervalDisposable.dispose();
-        fetchAttendeesDisposable.dispose();
-    }
-
-    private PopupWindowManager getPopupWindowManager() {
-        return new PopupWindowManager() {
-            @Override
-            public void open(final Event event) {
-                popupEventTitle.setText(event.getName());
-                String description = Html.fromHtml(event.getDescription()).toString();
-                popupEventDescription.setText(description);
-
-                previousMonth.setClickable(false);
-                nextMonth.setClickable(false);
-                calendarView.setTouchEnabled(false);
-
-                if (fetchAttendeesDisposable != null) {
-                    fetchAttendeesDisposable.dispose();
-                }
-
-                hostListView.getAttendeeAdapter().clear();
-                attendeeListView.getAttendeeAdapter().clear();
-
-                fetchAttendeesDisposable = meetupRepository.fetchAttendees(event)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Consumer<List<EventAttendee>>() {
-                            @Override
-                            public void accept(List<EventAttendee> allAttendees) {
-                                List<EventAttendee> hosts = new ArrayList<>();
-                                List<EventAttendee> attendees = new ArrayList<>();
-                                for (EventAttendee eventAttendee : allAttendees) {
-                                    if (eventAttendee.isHost() && eventAttendee.isAttending()) {
-                                        hosts.add(eventAttendee);
-                                    }
-
-                                    if (! eventAttendee.isHost() && eventAttendee.isAttending()) {
-                                        attendees.add(eventAttendee);
-                                    }
-                                }
-
-                                hostListView.getAttendeeAdapter().setAttendees(hosts);
-                                attendeeListView.getAttendeeAdapter().setAttendees(attendees);
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) throws Exception {
-                                Log.e("EXCEPTION", "some exception", throwable);
-                            }
-                        });
-
-                popupWindow.setVisibility(View.VISIBLE);
-            }
-        };
     }
 
     private void goToNextMonth() {
@@ -236,5 +150,19 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
                 }
             }
         });
+    }
+
+    @Override
+    public void onOpen() {
+        previousMonth.setClickable(false);
+        nextMonth.setClickable(false);
+        calendarView.setTouchEnabled(false);
+    }
+
+    @Override
+    public void onClose() {
+        previousMonth.setClickable(true);
+        nextMonth.setClickable(true);
+        calendarView.setTouchEnabled(true);
     }
 }

@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.denhac.kiosk.meetup.Event;
 import org.denhac.kiosk.meetup.MeetupRepository;
-import org.denhac.kiosk.popup.PopupWindowManager;
+import org.denhac.kiosk.popup.PopupWindow;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -29,12 +29,12 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
     private static final int VIEW_TYPE_DAY = 1;
 
     private final MeetupRepository meetupRepository;
-    private PopupWindowManager popupWindowManager;
+    private PopupWindow popupWindow;
     private Calendar currentlyViewedMonth;
 
-    public CalendarAdapter(MeetupRepository meetupRepository, PopupWindowManager popupWindowManager, Calendar currentlyViewedMonth) {
+    public CalendarAdapter(MeetupRepository meetupRepository, PopupWindow popupWindow, Calendar currentlyViewedMonth) {
         this.meetupRepository = meetupRepository;
-        this.popupWindowManager = popupWindowManager;
+        this.popupWindow = popupWindow;
         setCurrentlyViewedMonth(currentlyViewedMonth);
     }
 
@@ -53,7 +53,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         }
 
         // Return a new holder instance
-        return new ViewHolder(calendarItemView, viewType, popupWindowManager);
+        return new ViewHolder(calendarItemView, viewType, popupWindow);
     }
 
     @Override
@@ -109,14 +109,14 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         private TextView titleView;
         private Disposable disposable;
 
-        public ViewHolder(View itemView, int viewType, PopupWindowManager popupWindowManager) {
+        public ViewHolder(View itemView, int viewType, PopupWindow popupWindow) {
             super(itemView);
 
             titleView = itemView.findViewById(R.id.title);
             calendarItem = itemView.findViewById(R.id.calendar_item);
             if (viewType == VIEW_TYPE_DAY) {
                 eventsList = itemView.findViewById(R.id.events_list);
-                eventsList.setAdapter(new EventListAdapter(popupWindowManager));
+                eventsList.setAdapter(new EventListAdapter(popupWindow));
                 eventsList.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             }
         }

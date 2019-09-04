@@ -10,17 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.denhac.kiosk.meetup.Event;
-import org.denhac.kiosk.popup.PopupWindowManager;
+import org.denhac.kiosk.popup.PopupWindow;
 
 import java.util.Collections;
 import java.util.List;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
     private List<Event> events = Collections.emptyList();
-    private PopupWindowManager popupWindowManager;
+    private PopupWindow popupWindow;
 
-    public EventListAdapter(PopupWindowManager popupWindowManager) {
-        this.popupWindowManager = popupWindowManager;
+    public EventListAdapter(PopupWindow popupWindow) {
+        this.popupWindow = popupWindow;
     }
 
     public void setEvents(List<Event> events) {
@@ -49,7 +49,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         View listView = inflater.inflate(R.layout.calendar_list_item, parent, false);
 
         // Return a new holder instance
-        return new EventListAdapter.ViewHolder(listView, popupWindowManager);
+        return new EventListAdapter.ViewHolder(listView, popupWindow);
     }
 
     @Override
@@ -67,17 +67,17 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         private final TextView meetingTimeView;
         private final TextView meetingNameView;
         private final TextView meetingYesRSVP;
-        private PopupWindowManager popupWindowManager;
+        private PopupWindow popupWindow;
 
 
-        public ViewHolder(View itemView, PopupWindowManager popupWindowManager) {
+        public ViewHolder(View itemView, PopupWindow popupWindow) {
             super(itemView);
 
             this.itemView = itemView;
             meetingTimeView = itemView.findViewById(R.id.meeting_time);
             meetingNameView = itemView.findViewById(R.id.meeting_name);
             meetingYesRSVP = itemView.findViewById(R.id.meeting_yes_rsvp);
-            this.popupWindowManager = popupWindowManager;
+            this.popupWindow = popupWindow;
         }
 
         public void bind(final Event event) {
@@ -90,7 +90,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
                 @Override
                 public void onClick(View view) {
 //                    Toast.makeText(view.getContext(), event.getDescription(), Toast.LENGTH_LONG).show();
-                    popupWindowManager.open(event);
+                    popupWindow.open(event);
                 }
             });
         }

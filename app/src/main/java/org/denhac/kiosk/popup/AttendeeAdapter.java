@@ -3,7 +3,6 @@ package org.denhac.kiosk.popup;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.denhac.kiosk.R;
-import org.denhac.kiosk.meetup.EventAttendee;
+import org.denhac.kiosk.meetup.EventRSVP;
 import org.denhac.kiosk.meetup.MeetupRepository;
 
 import java.util.ArrayList;
@@ -27,7 +25,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.ViewHolder> {
-    private List<EventAttendee> attendees;
+    private List<EventRSVP> attendees;
     private MeetupRepository meetupRepository;
 
     public AttendeeAdapter(MeetupRepository meetupRepository) {
@@ -58,13 +56,24 @@ public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.ViewHo
         return attendees.size();
     }
 
-    public void setAttendees(List<EventAttendee> attendees) {
+    public void setAttendees(List<EventRSVP> attendees) {
+        List<EventRSVP> oldAttendees = this.attendees;
         this.attendees = attendees;
-        notifyDataSetChanged();
+
+        if(oldAttendees.size() != attendees.size()) {
+            notifyDataSetChanged();
+            return;
+        }
+
+        for (int i = 0; i < oldAttendees.size(); i++) {
+            if(! oldAttendees.get(i).equals(attendees.get(i))) {
+                notifyItemChanged(i);
+            }
+        }
     }
 
     public void clear() {
-        setAttendees(new ArrayList<EventAttendee>());
+        setAttendees(new ArrayList<EventRSVP>());
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -79,15 +88,15 @@ public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.ViewHo
             attendeeImageView = itemView.findViewById(R.id.attendee_image);
         }
 
-        void bind(EventAttendee eventAttendee) {
+        void bind(EventRSVP eventRSVP) {
             if (imageDisposable != null) {
                 imageDisposable.dispose();
             }
 
-            attendeeNameTextView.setText(eventAttendee.getName());
+            attendeeNameTextView.setText(eventRSVP.getName());
             attendeeImageView.setImageDrawable(null);
 
-            final String photoLink = eventAttendee.getPhotoLink();
+            final String photoLink = eventRSVP.getPhotoLink();
             if (photoLink != null) {
                 imageDisposable = meetupRepository
                         .getImageData(photoLink)
