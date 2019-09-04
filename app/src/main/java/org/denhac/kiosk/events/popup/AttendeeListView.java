@@ -1,4 +1,4 @@
-package org.denhac.kiosk.popup;
+package org.denhac.kiosk.events.popup;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.denhac.kiosk.meetup.MeetupRepository;
+import org.denhac.kiosk.events.meetup.MeetupRepository;
 
 public class AttendeeListView extends RecyclerView {
     private AttendeeAdapter attendeeAdapter;

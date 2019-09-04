@@ -1,4 +1,4 @@
-package org.denhac.kiosk;
+package org.denhac.kiosk.events;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,8 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.denhac.kiosk.meetup.Event;
-import org.denhac.kiosk.popup.PopupWindow;
+import org.denhac.kiosk.R;
+import org.denhac.kiosk.events.meetup.Event;
+import org.denhac.kiosk.events.popup.PopupWindow;
 
 import java.util.Collections;
 import java.util.List;

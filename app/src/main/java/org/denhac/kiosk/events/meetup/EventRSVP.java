@@ -1,4 +1,4 @@
-package org.denhac.kiosk.meetup;
+package org.denhac.kiosk.events.meetup;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

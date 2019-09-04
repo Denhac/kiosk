@@ -1,4 +1,4 @@
-package org.denhac.kiosk.meetup;
+package org.denhac.kiosk.events.meetup;
 
 
 import java.util.List;

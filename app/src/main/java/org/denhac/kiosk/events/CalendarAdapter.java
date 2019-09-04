@@ -1,4 +1,4 @@
-package org.denhac.kiosk;
+package org.denhac.kiosk.events;
 
 import android.content.Context;
 import android.text.format.DateUtils;
@@ -13,9 +13,10 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.denhac.kiosk.meetup.Event;
-import org.denhac.kiosk.meetup.MeetupRepository;
-import org.denhac.kiosk.popup.PopupWindow;
+import org.denhac.kiosk.R;
+import org.denhac.kiosk.events.meetup.Event;
+import org.denhac.kiosk.events.meetup.MeetupRepository;
+import org.denhac.kiosk.events.popup.PopupWindow;
 
 import java.util.Calendar;
 import java.util.Collections;

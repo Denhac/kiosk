@@ -1,4 +1,4 @@
-package org.denhac.kiosk;
+package org.denhac.kiosk.events;
 
 import android.content.Context;
 import android.util.AttributeSet;

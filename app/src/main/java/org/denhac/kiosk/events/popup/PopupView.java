@@ -1,4 +1,4 @@
-package org.denhac.kiosk.popup;
+package org.denhac.kiosk.events.popup;
 
 import android.content.Context;
 import android.text.Html;
@@ -11,9 +11,9 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import org.denhac.kiosk.R;
-import org.denhac.kiosk.meetup.Event;
-import org.denhac.kiosk.meetup.EventRSVP;
-import org.denhac.kiosk.meetup.MeetupRepository;
+import org.denhac.kiosk.events.meetup.Event;
+import org.denhac.kiosk.events.meetup.EventRSVP;
+import org.denhac.kiosk.events.meetup.MeetupRepository;
 
 import java.util.ArrayList;
 import java.util.List;

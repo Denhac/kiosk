@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="8dp"
-    tools:context=".EventsActivity">
+    tools:context=".events.EventsActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_bar"
@@ -59,7 +59,7 @@
             app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <org.denhac.kiosk.CalendarView
+    <org.denhac.kiosk.events.CalendarView
         android:id="@+id/calendar_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -88,7 +88,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/calendar_recycler_view" />
 
-    <org.denhac.kiosk.popup.PopupView
+    <org.denhac.kiosk.events.popup.PopupView
         android:id="@+id/popup_window"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

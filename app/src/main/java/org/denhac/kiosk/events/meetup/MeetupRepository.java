@@ -1,4 +1,4 @@
-package org.denhac.kiosk.meetup;
+package org.denhac.kiosk.events.meetup;
 
 import android.os.SystemClock;
 import android.util.Log;

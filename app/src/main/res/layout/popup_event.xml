@@ -76,7 +76,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/popup_event_description"
                 app:layout_constraintBottom_toTopOf="@+id/hosts_list_view"/>
 
-            <org.denhac.kiosk.popup.AttendeeListView
+            <org.denhac.kiosk.events.popup.AttendeeListView
                 android:id="@+id/hosts_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/hosts_list_view"
                 app:layout_constraintBottom_toTopOf="@+id/attendees_list_view"/>
 
-            <org.denhac.kiosk.popup.AttendeeListView
+            <org.denhac.kiosk.events.popup.AttendeeListView
                 android:id="@+id/attendees_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
