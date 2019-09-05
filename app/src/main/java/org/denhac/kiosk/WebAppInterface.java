@@ -5,16 +5,33 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 public class WebAppInterface {
-    Context mContext;
+    private Context context;
+    private Callback callback;
 
     /** Instantiate the interface and set the context */
-    WebAppInterface(Context c) {
-        mContext = c;
+    WebAppInterface(Context context, Callback callback) {
+        this.context = context;
+        this.callback = callback;
     }
 
-    /** Show a toast from the web page */
+    @JavascriptInterface
+    public void setupFinished() {
+        this.callback.onSetupFinished();
+    }
+
     @JavascriptInterface
     public void showToast(String toast) {
-        Toast.makeText(mContext, toast, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, toast, Toast.LENGTH_LONG).show();
+    }
+
+    @JavascriptInterface
+    public void showSigningForm(String fieldName) {
+        this.callback.showSigningForm(fieldName);
+    }
+
+    interface Callback {
+        void onSetupFinished();
+
+        void showSigningForm(String fieldName);
     }
 }

@@ -1,7 +1,4 @@
 var signing = document.querySelectorAll(".wpforms-signature-wrap");
-Android.showToast(signing.length);
-
-console.log(signing);
 
 for(var i = 0; i < signing.length; i++) {
     var node = signing[i];
@@ -12,11 +9,12 @@ for(var i = 0; i < signing.length; i++) {
     button.innerHTML = 'Tap to sign';
     button.addEventListener("click", function(event) {
         event.preventDefault();
-        Android.showToast("Clicked!");
+        var textNode = event.target.parentNode.querySelectorAll(".wpforms-signature-input")[0];
+        var textNodeName = textNode.getAttribute("Name")
+        Android.showSigningForm(textNodeName);
     });
-
-    console.log(node);
-    console.log(node.parentNode);
 
     node.parentNode.replaceChild(button, node);
 }
+
+Android.setupFinished();

@@ -9,4 +9,7 @@
     <string name="attendees_text">Attendees</string>
     <string name="hosts_text">Hosts</string>
     <string name="attendee_image">Attendee Image</string>
+    <string name="loading_text">Loading</string>
+    <string name="clear_text">Clear</string>
+    <string name="confirm_text">Confirm</string>
 </resources>
