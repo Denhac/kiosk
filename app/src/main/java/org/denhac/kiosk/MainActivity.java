@@ -55,6 +55,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        ConstraintLayout wifiGroup = findViewById(R.id.wifi_group);
+        wifiGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), WifiActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
