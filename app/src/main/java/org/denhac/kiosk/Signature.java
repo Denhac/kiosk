@@ -146,6 +146,12 @@ public class Signature extends View {
         return Observable.fromCallable(new Callable<String>() {
             @Override
             public String call() {
+                float length = new PathMeasure(path, false).getLength();
+
+                if(length < 10) {
+                    return "";
+                }
+
                 Bitmap bitmap = Bitmap.createBitmap(
                         Signature.this.getWidth(),
                         Signature.this.getHeight(),

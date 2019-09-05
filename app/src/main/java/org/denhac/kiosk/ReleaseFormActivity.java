@@ -73,12 +73,14 @@ public class ReleaseFormActivity extends AppCompatActivity implements WebAppInte
                 final String fieldName = signBox.getFieldName();
                 signatures.put(signBox.getFieldName(), signBox.getPath());
 
-                Log.i("HERE", "I got here");
-
                 Disposable disposable = signBox.getBase64()
                         .subscribe(new Consumer<String>() {
                             @Override
                             public void accept(String s) {
+                                if(s.equals("")) {
+                                    return;
+                                }
+
                                 String javascript = "javascript:(function() {" +
                                         "document.querySelector('[name=\"" + fieldName + "\"')" +
                                         ".value = 'data:image/png;base64," + s + "';" +
@@ -86,12 +88,20 @@ public class ReleaseFormActivity extends AppCompatActivity implements WebAppInte
                                 Log.i("LENGTH", String.valueOf(s.length()));
                                 webView.loadUrl(javascript);
                             }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) {
+                                Log.e("Base 64", "Error", throwable);
+                            }
                         });
                 compositeDisposable.add(disposable);
             }
         });
 
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setSaveFormData(false);
+        webView.getSettings().setSavePassword(false);
+        webView.clearFormData();
 
         webView.addJavascriptInterface(new WebAppInterface(this, this), "Android");
 
