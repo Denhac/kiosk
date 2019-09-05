@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ReleaseFormActivity" />
+        <activity android:name=".WebViewActivity" />
         <activity android:name=".events.EventsActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

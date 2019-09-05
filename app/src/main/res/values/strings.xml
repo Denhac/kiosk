@@ -1,10 +1,18 @@
 <resources>
     <string name="app_name">Denhac Kiosk</string>
-    <string name="events_link_content_description">Events link</string>
-    <string name="waiver_link_content_description">Waiver Link</string>
-    <string name="sign_waiver_text">Sign Waiver</string>
-    <string name="see_events_text">See Events</string>
     <string name="denhac_kiosk_title">denhac kiosk</string>
+
+    <string name="see_events_text">See Events</string>
+    <string name="events_link_content_description">Events link</string>
+    <string name="new_member_text">Become a Member</string>
+    <string name="new_member_link_content_description">New Member link</string>
+    <string name="sign_waiver_text">Sign Waiver</string>
+    <string name="waiver_link_content_description">Waiver Link</string>
+    <string name="help_text">Help</string>
+    <string name="help_link_content_description">Howto denhac link</string>
+    <string name="wifi_text">Wifi Information</string>
+    <string name="wifi_content_description">Wifi Information</string>
+
     <string name="offline_text">Offline</string>
     <string name="attendees_text">Attendees</string>
     <string name="hosts_text">Hosts</string>

@@ -1,11 +1,16 @@
 package org.denhac.kiosk;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Path;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
@@ -24,7 +29,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 
-public class ReleaseFormActivity extends AppCompatActivity implements WebAppInterface.Callback {
+public class WebViewActivity extends AppCompatActivity implements WebAppInterface.Callback {
+    private static final String EXTRA_URL = "ExtraUrl";
 
     private WebView webView;
     private TextView pleaseWait;
@@ -39,6 +45,12 @@ public class ReleaseFormActivity extends AppCompatActivity implements WebAppInte
     private boolean webViewTouchesEnabled = true;
 
     private Map<String, Path> signatures;
+
+    public static Intent newIntent(Context applicationContext, String url) {
+        Intent intent = new Intent(applicationContext, WebViewActivity.class);
+        intent.putExtra(EXTRA_URL, url);
+        return intent;
+    }
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -77,7 +89,7 @@ public class ReleaseFormActivity extends AppCompatActivity implements WebAppInte
                         .subscribe(new Consumer<String>() {
                             @Override
                             public void accept(String s) {
-                                if(s.equals("")) {
+                                if (s.equals("")) {
                                     return;
                                 }
 
@@ -98,10 +110,15 @@ public class ReleaseFormActivity extends AppCompatActivity implements WebAppInte
             }
         });
 
+        WebStorage.getInstance().deleteAllData();
+        CookieManager.getInstance().removeAllCookie();
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setSaveFormData(false);
         webView.getSettings().setSavePassword(false);
         webView.clearFormData();
+        webView.getSettings().setAppCacheEnabled(false);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.clearCache(true);
 
         webView.addJavascriptInterface(new WebAppInterface(this, this), "Android");
 
@@ -110,19 +127,32 @@ public class ReleaseFormActivity extends AppCompatActivity implements WebAppInte
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
-                compositeDisposable.add(Observable
-                        .defer(new Callable<ObservableSource<String>>() {
-                            @Override
-                            public ObservableSource<String> call() {
-                                return new JavaScriptObservableSource(getAssets(), "js/release.js");
-                            }
-                        })
-                        .subscribe(new Consumer<String>() {
-                            @Override
-                            public void accept(String js) {
-                                webView.loadUrl(js);
-                            }
-                        }));
+                final String killHeaderFooter = "javascript:(function() {" +
+                        "document.getElementById('site-navigation').remove();" +
+                        "var footers = document.getElementsByClassName('site-footer');" +
+                        "for(var i = 0; i < footers.length; i++) {" +
+                        "footers[0].remove();" +
+                        "}" +
+                        "})()";
+                webView.loadUrl(killHeaderFooter);
+
+                if (url.endsWith("release")) {
+                    compositeDisposable.add(Observable
+                            .defer(new Callable<ObservableSource<String>>() {
+                                @Override
+                                public ObservableSource<String> call() {
+                                    return new JavaScriptObservableSource(getAssets(), "js/release.js");
+                                }
+                            })
+                            .subscribe(new Consumer<String>() {
+                                @Override
+                                public void accept(String js) {
+                                    webView.loadUrl(js);
+                                }
+                            }));
+                } else {
+                    onSetupFinished();
+                }
             }
         });
 
@@ -136,7 +166,7 @@ public class ReleaseFormActivity extends AppCompatActivity implements WebAppInte
 
     @Override
     protected void onResume() {
-        webView.loadUrl("https://denhac.org/release");
+        webView.loadUrl(getIntent().getStringExtra(EXTRA_URL));
 
         super.onResume();
     }

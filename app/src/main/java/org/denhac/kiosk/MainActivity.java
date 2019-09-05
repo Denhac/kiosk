@@ -26,11 +26,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ConstraintLayout newMemberGroup = findViewById(R.id.new_member_group);
+        newMemberGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = WebViewActivity.newIntent(getApplicationContext(),
+                        "https://denhac.org/membership");
+                startActivity(intent);
+            }
+        });
+
         ConstraintLayout waiverGroup = findViewById(R.id.waiver_group);
         waiverGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), ReleaseFormActivity.class);
+                Intent intent = WebViewActivity.newIntent(getApplicationContext(),
+                        "https://denhac.org/release");
+                startActivity(intent);
+            }
+        });
+
+        ConstraintLayout helpGroup = findViewById(R.id.help_group);
+        helpGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = WebViewActivity.newIntent(getApplicationContext(),
+                        "https://denhac.org/howto");
                 startActivity(intent);
             }
         });
@@ -38,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Toast.makeText(getApplicationContext(),"kiosk mode", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "kiosk mode", Toast.LENGTH_LONG).show();
     }
 
     @Override
