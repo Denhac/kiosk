@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
@@ -120,6 +119,19 @@ public class WebViewActivity extends AppCompatActivity implements WebAppInterfac
 
         signForm = findViewById(R.id.sign_form);
         signBox = findViewById(R.id.sign_box);
+        Disposable onPathChanged = signBox
+                .onPathChanged()
+                .subscribe(new Consumer<Signature.Irrelevant>() {
+                    @Override
+                    public void accept(Signature.Irrelevant irrelevant) {
+                        if(signBox.pathIsTooShort()) {
+                            buttonConfirm.setText(R.string.cancel_text);
+                        } else {
+                            buttonConfirm.setText(R.string.confirm_text);
+                        }
+                    }
+                });
+        compositeDisposable.add(onPathChanged);
 
         buttonClear = findViewById(R.id.sign_clear);
         buttonClear.setOnClickListener(new View.OnClickListener() {
@@ -134,7 +146,12 @@ public class WebViewActivity extends AppCompatActivity implements WebAppInterfac
             @Override
             public void onClick(View view) {
                 signForm.setVisibility(View.INVISIBLE);
-                webViewTouchesEnabled = true;
+                setBackgroundItemsClickable(true);
+
+                if(signBox.pathIsTooShort()) {
+                    return;
+                }
+
                 final String fieldName = signBox.getFieldName();
                 signatures.put(signBox.getFieldName(), signBox.getPath());
 
@@ -314,10 +331,15 @@ public class WebViewActivity extends AppCompatActivity implements WebAppInterfac
                 }
 
                 signForm.setVisibility(View.VISIBLE);
-                webViewTouchesEnabled = false;
+                setBackgroundItemsClickable(false);
             }
         });
-        // Update the signature text field with whatever base64 image gets created with the signature
-        // Change the DOM to show a smaller version of the signature next to the button
+    }
+
+    public void setBackgroundItemsClickable(boolean clickable) {
+        webViewTouchesEnabled = clickable;
+        forwardButton.setClickable(clickable);
+        backButton.setClickable(clickable);
+        homeButton.setClickable(clickable);
     }
 }

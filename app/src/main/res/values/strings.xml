@@ -20,6 +20,7 @@
     <string name="loading_text">Loading</string>
     <string name="clear_text">Clear</string>
     <string name="confirm_text">Confirm</string>
+    <string name="cancel_text">Cancel</string>
     <string name="wifi_qr_code">Wifi QR Code</string>
     <string name="ssid_denhac">SSID: denhac</string>
     <string name="password_denhac_rules">Password: denhac rules</string>

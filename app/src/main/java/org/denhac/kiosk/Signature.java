@@ -9,13 +9,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.RectF;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -24,39 +21,41 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 public class Signature extends View {
     private static final float STROKE_WIDTH = 5f;
     private static final float HALF_STROKE_WIDTH = STROKE_WIDTH / 2;
 
-    private final Context context;
+    enum Irrelevant { INSTANCE; }
+
     private Paint paint = new Paint();
     private Path path;
     private float lastTouchX;
     private float lastTouchY;
     private final RectF dirtyRect = new RectF();
 
+    private PublishSubject<Irrelevant> pathChangedSubject;
+
     private String fieldName;
 
     public Signature(Context context) {
         super(context);
-        this.context = context;
 
         init();
     }
 
     public Signature(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        this.context = context;
 
         init();
     }
 
     private void init() {
+        pathChangedSubject = PublishSubject.create();
+
         paint.setAntiAlias(true);
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
@@ -67,6 +66,7 @@ public class Signature extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(path, paint);
+        pathChangedSubject.onNext(Irrelevant.INSTANCE);
     }
 
     @Override
@@ -132,6 +132,10 @@ public class Signature extends View {
         dirtyRect.bottom = Math.max(lastTouchY, eventY);
     }
 
+    public Observable<Irrelevant> onPathChanged() {
+        return pathChangedSubject.hide();
+    }
+
     public Path getPath() {
         return path;
     }
@@ -141,14 +145,20 @@ public class Signature extends View {
         invalidate();
     }
 
+    public float getPathLength() {
+        return new PathMeasure(path, false).getLength();
+    }
+
+    public boolean pathIsTooShort() {
+        return getPathLength() < 300;
+    }
+
     @SuppressLint("CheckResult")
     public Observable<String> getBase64() {
         return Observable.fromCallable(new Callable<String>() {
             @Override
             public String call() {
-                float length = new PathMeasure(path, false).getLength();
-
-                if(length < 10) {
+                if(pathIsTooShort()) {
                     return "";
                 }
 
