@@ -3,23 +3,32 @@ package org.denhac.kiosk;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Path;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.widget.ContentLoadingProgressBar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
@@ -32,8 +41,18 @@ import io.reactivex.functions.Consumer;
 public class WebViewActivity extends AppCompatActivity implements WebAppInterface.Callback {
     private static final String EXTRA_URL = "ExtraUrl";
 
+    private ConstraintLayout loadingScreen;
+    private ContentLoadingProgressBar progressBar;
+
+    private ConstraintLayout webWindow;
     private WebView webView;
-    private TextView pleaseWait;
+    private ImageView homeButton;
+    private ImageView backButton;
+    private ImageView forwardButton;
+    private TextView urlView;
+    private List<String> navigatedURLs;
+    private int navigationIndex = -1;
+    private boolean buttonNavigation = false;
 
     private ConstraintLayout signForm;
     private Signature signBox;
@@ -56,14 +75,48 @@ public class WebViewActivity extends AppCompatActivity implements WebAppInterfac
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_release_form);
+        setContentView(R.layout.activity_web_view);
 
         signatures = new HashMap<>();
 
         compositeDisposable = new CompositeDisposable();
 
+        loadingScreen = findViewById(R.id.loading_screen);
+        progressBar = findViewById(R.id.progress_bar);
+
+        webWindow = findViewById(R.id.web_window);
         webView = findViewById(R.id.web_view);
-        pleaseWait = findViewById(R.id.please_wait_text);
+        navigatedURLs = new ArrayList<>();
+        homeButton = findViewById(R.id.home_button);
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+        backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(navigationIndex > 0) {
+                    navigationIndex--;
+                    buttonNavigation = true;
+                    webView.loadUrl(navigatedURLs.get(navigationIndex));
+                }
+            }
+        });
+        forwardButton = findViewById(R.id.forward_button);
+        forwardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(navigationIndex < navigatedURLs.size() - 1) {
+                    navigationIndex++;
+                    buttonNavigation = true;
+                    webView.loadUrl(navigatedURLs.get(navigationIndex));
+                }
+            }
+        });
+        urlView = findViewById(R.id.url);
 
         signForm = findViewById(R.id.sign_form);
         signBox = findViewById(R.id.sign_box);
@@ -127,6 +180,7 @@ public class WebViewActivity extends AppCompatActivity implements WebAppInterfac
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
+                // TODO Consider switching to injecting the JS all at once and calling onSetupFinished then
                 final String killHeaderFooter = "javascript:(function() {" +
                         "document.getElementById('site-navigation').remove();" +
                         "var footers = document.getElementsByClassName('site-footer');" +
@@ -153,6 +207,64 @@ public class WebViewActivity extends AppCompatActivity implements WebAppInterfac
                 } else {
                     onSetupFinished();
                 }
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+
+                if(!buttonNavigation) {
+                    if(navigationIndex < navigatedURLs.size() - 1) {
+                        navigatedURLs.subList(navigationIndex + 1, navigatedURLs.size()).clear();
+                    }
+                    navigationIndex++;
+                    navigatedURLs.add(url);
+                }
+
+                buttonNavigation = false;
+
+                Log.i("TAG", "Page started");
+                Log.i("TAG", "Nav: " + navigationIndex);
+                Log.i("TAG", "Size: " + navigatedURLs.size());
+                urlView.setText(url);
+                if(navigationIndex == 0) {
+                    backButton.setImageResource(R.drawable.ic_arrow_back_grey_24dp);
+                    Log.i("TAG", "Back Grey");
+                } else {
+                    backButton.setImageResource(R.drawable.ic_arrow_back_black_24dp);
+                    Log.i("TAG", "Back Black");
+                }
+
+                if(navigationIndex == navigatedURLs.size() - 1) {
+                    forwardButton.setImageResource(R.drawable.ic_arrow_forward_grey_24dp);
+                    Log.i("TAG", "Forward Grey");
+                } else {
+                    forwardButton.setImageResource(R.drawable.ic_arrow_forward_black_24dp);
+                    Log.i("TAG", "Forward Black");
+                }
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String urlString) {
+                Uri uri = Uri.parse(urlString);
+                Log.i("TAG", "Should override");
+                if (String.valueOf(uri.getHost()).endsWith("denhac.org")) {
+                    return false;
+                }
+
+                Toast.makeText(getApplicationContext(),
+                        "Navigation outside denhac.org is not allowed",
+                        Toast.LENGTH_LONG).show();
+
+                return true;
+            }
+        });
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                super.onProgressChanged(view, newProgress);
+                progressBar.setProgress(newProgress);
             }
         });
 
@@ -182,8 +294,8 @@ public class WebViewActivity extends AppCompatActivity implements WebAppInterfac
         runOnUiThread(new Runnable() {
 
             public void run() {
-                pleaseWait.setVisibility(View.INVISIBLE);
-                webView.setVisibility(View.VISIBLE);
+                loadingScreen.setVisibility(View.INVISIBLE);
+                webWindow.setVisibility(View.VISIBLE);
             }
         });
     }
