@@ -38,6 +38,8 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
 
     private Disposable intervalDisposable;
     private PopupView popupView;
+    private ImageView homeButton;
+    private ImageView todayButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,26 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
         });
 
         offlineTextView = findViewById(R.id.offline_text);
+
+        homeButton = findViewById(R.id.home_button);
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+        todayButton = findViewById(R.id.today_button);
+        todayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                currentDay = Calendar.getInstance();
+                currentViewedMonth = (Calendar) currentDay.clone();
+                currentViewedMonth.set(Calendar.DAY_OF_MONTH, currentViewedMonth.getActualMinimum(Calendar.DAY_OF_MONTH));
+
+                updateView();
+            }
+        });
 
         updateView();
 
@@ -155,15 +177,19 @@ public class EventsActivity extends AppCompatActivity implements MeetupRepositor
 
     @Override
     public void onOpen() {
-        previousMonth.setClickable(false);
-        nextMonth.setClickable(false);
-        calendarView.setTouchEnabled(false);
+        setBackgroundItemsClickable(false);
     }
 
     @Override
     public void onClose() {
-        previousMonth.setClickable(true);
-        nextMonth.setClickable(true);
-        calendarView.setTouchEnabled(true);
+        setBackgroundItemsClickable(true);
+    }
+
+    public void setBackgroundItemsClickable(boolean clickable) {
+        previousMonth.setClickable(clickable);
+        nextMonth.setClickable(clickable);
+        calendarView.setTouchEnabled(clickable);
+        homeButton.setClickable(clickable);
+        todayButton.setClickable(clickable);
     }
 }

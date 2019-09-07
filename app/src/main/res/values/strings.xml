@@ -23,4 +23,6 @@
     <string name="wifi_qr_code">Wifi QR Code</string>
     <string name="ssid_denhac">SSID: denhac</string>
     <string name="password_denhac_rules">Password: denhac rules</string>
+    <string name="home_button">Home Button</string>
+    <string name="today_button">Today Button</string>
 </resources>

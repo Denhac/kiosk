@@ -3,6 +3,7 @@ package org.denhac.kiosk;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,10 +22,17 @@ public class WifiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wifi);
 
+        ImageView homeButton = findViewById(R.id.home_button);
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         qrCodeView = findViewById(R.id.qr_code);
 
         int smallerDimension = Math.min(qrCodeView.getMinimumWidth(), qrCodeView.getMinimumHeight());
-        Log.i("DIM", String.valueOf(smallerDimension));
 
         String qrText = "WIFI:T:WPA;S:denhac;P:denhac rules;;";
 

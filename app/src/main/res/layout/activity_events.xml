@@ -64,29 +64,67 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:overScrollMode="never"
-        app:layout_constraintBottom_toTopOf="@+id/offline_text"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="spread"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_bar"
         app:layout_constraintVertical_weight="1" />
 
-    <TextView
-        android:id="@+id/offline_text"
+    <ImageView
+        android:id="@+id/home_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:minWidth="120dp"
+        android:minHeight="120dp"
+        android:padding="4dp"
         android:background="@drawable/offline_border"
-        android:padding="16dp"
-        android:text="@string/offline_text"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="48sp"
-        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_home_black_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/home_button" />
+
+    <ImageView
+        android:id="@+id/today_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="120dp"
+        android:minHeight="120dp"
+        android:padding="4dp"
+        android:background="@drawable/offline_border"
+        app:srcCompat="@drawable/ic_today_black_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="@string/today_button" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/calendar_recycler_view" />
+        app:layout_constraintTop_toBottomOf="@+id/calendar_recycler_view" >
+
+        <TextView
+            android:id="@+id/offline_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@drawable/offline_border"
+            android:padding="16dp"
+            android:text="@string/offline_text"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="48sp"
+            android:visibility="invisible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <org.denhac.kiosk.events.popup.PopupView
         android:id="@+id/popup_window"
