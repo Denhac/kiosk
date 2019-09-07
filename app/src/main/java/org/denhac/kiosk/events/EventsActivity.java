@@ -6,9 +6,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import org.denhac.kiosk.KioskActivity;
 import org.denhac.kiosk.R;
 import org.denhac.kiosk.events.meetup.MeetupRepository;
 import org.denhac.kiosk.events.popup.PopupView;
@@ -24,7 +24,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class EventsActivity extends AppCompatActivity implements MeetupRepository.NetworkStatus, PopupWindow.Callback {
+public class EventsActivity extends KioskActivity implements MeetupRepository.NetworkStatus, PopupWindow.Callback {
 
     private TextView monthText;
     private Calendar currentDay;

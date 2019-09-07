@@ -6,14 +6,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.zxing.WriterException;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
 
-public class WifiActivity extends AppCompatActivity {
+public class WifiActivity extends KioskActivity {
 
     private ImageView qrCodeView;
 

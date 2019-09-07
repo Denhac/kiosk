@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.widget.ContentLoadingProgressBar;
 
@@ -37,7 +36,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 
-public class WebViewActivity extends AppCompatActivity implements WebAppInterface.Callback {
+public class WebViewActivity extends KioskActivity implements WebAppInterface.Callback {
     private static final String EXTRA_URL = "ExtraUrl";
 
     private ConstraintLayout loadingScreen;

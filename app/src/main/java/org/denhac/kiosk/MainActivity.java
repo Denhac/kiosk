@@ -5,12 +5,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import org.denhac.kiosk.events.EventsActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends KioskActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
