@@ -77,7 +77,9 @@ public class MainActivity extends KioskActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected long getNoInteractionTimeout() {
+        // Really, we never want this activity to exit. Hopefully this is long enough but a bunch of
+        // engineers were wrong before about how long their code would last and then we got Y2K.
+        return Long.MAX_VALUE - 1;
     }
 }

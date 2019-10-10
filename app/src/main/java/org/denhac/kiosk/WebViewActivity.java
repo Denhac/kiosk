@@ -239,31 +239,23 @@ public class WebViewActivity extends KioskActivity implements WebAppInterface.Ca
 
                 buttonNavigation = false;
 
-                Log.i("TAG", "Page started");
-                Log.i("TAG", "Nav: " + navigationIndex);
-                Log.i("TAG", "Size: " + navigatedURLs.size());
                 urlView.setText(url);
                 if(navigationIndex == 0) {
                     backButton.setImageResource(R.drawable.ic_arrow_back_grey_24dp);
-                    Log.i("TAG", "Back Grey");
                 } else {
                     backButton.setImageResource(R.drawable.ic_arrow_back_black_24dp);
-                    Log.i("TAG", "Back Black");
                 }
 
                 if(navigationIndex == navigatedURLs.size() - 1) {
                     forwardButton.setImageResource(R.drawable.ic_arrow_forward_grey_24dp);
-                    Log.i("TAG", "Forward Grey");
                 } else {
                     forwardButton.setImageResource(R.drawable.ic_arrow_forward_black_24dp);
-                    Log.i("TAG", "Forward Black");
                 }
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String urlString) {
                 Uri uri = Uri.parse(urlString);
-                Log.i("TAG", "Should override");
                 if (String.valueOf(uri.getHost()).endsWith("denhac.org")) {
                     return false;
                 }
@@ -314,6 +306,8 @@ public class WebViewActivity extends KioskActivity implements WebAppInterface.Ca
                 webWindow.setVisibility(View.VISIBLE);
             }
         });
+
+        resetTimer();
     }
 
     @Override
@@ -340,5 +334,10 @@ public class WebViewActivity extends KioskActivity implements WebAppInterface.Ca
         forwardButton.setClickable(clickable);
         backButton.setClickable(clickable);
         homeButton.setClickable(clickable);
+    }
+
+    @Override
+    protected long getNoInteractionTimeout() {
+        return 60;
     }
 }

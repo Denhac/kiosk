@@ -44,4 +44,9 @@ public class WifiActivity extends KioskActivity {
             Log.v("FAILED_QR", e.toString());
         }
     }
+
+    @Override
+    protected long getNoInteractionTimeout() {
+        return 60;
+    }
 }

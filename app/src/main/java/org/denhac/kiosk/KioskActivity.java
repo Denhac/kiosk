@@ -3,13 +3,17 @@ package org.denhac.kiosk;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 public abstract class KioskActivity extends AppCompatActivity {
     // To keep track of activity's window focus
@@ -19,6 +23,10 @@ public abstract class KioskActivity extends AppCompatActivity {
     boolean isPaused;
 
     Handler collapseNotificationHandler;
+
+    private TextView countdownTextView;
+    private Disposable timerDisposable;
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
@@ -42,6 +50,10 @@ public abstract class KioskActivity extends AppCompatActivity {
                 .getSystemService(Context.ACTIVITY_SERVICE);
 
         activityManager.moveTaskToFront(getTaskId(), 0);
+
+        if (timerDisposable != null) {
+            timerDisposable.dispose();
+        }
     }
 
     @Override
@@ -49,9 +61,20 @@ public abstract class KioskActivity extends AppCompatActivity {
         super.onResume();
 
         isPaused = false;
+
+        resetTimer();
     }
 
-    public void collapseNow() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (timerDisposable != null) {
+            timerDisposable.dispose();
+        }
+    }
+
+    private void collapseNow() {
 
         // Initialize 'collapseNotificationHandler'
         if (collapseNotificationHandler == null) {
@@ -112,5 +135,55 @@ public abstract class KioskActivity extends AppCompatActivity {
                 }
             }, 300L);
         }
+    }
+
+    @Override
+    public void onContentChanged() {
+        super.onContentChanged();
+        countdownTextView = findViewById(R.id.countdown);
+    }
+
+    @Override
+    public void onUserInteraction() {
+        resetTimer();
+        super.onUserInteraction();
+    }
+
+    protected abstract long getNoInteractionTimeout();
+
+    protected void resetTimer() {
+        if (timerDisposable != null) {
+            timerDisposable.dispose();
+        }
+
+        timerDisposable = new CountdownTimer(getNoInteractionTimeout())
+                .getObservable()
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(final Long timeLeft) {
+                        if (timeLeft <= 0) {
+                            finish();
+                        } else if (timeLeft <= 10) {
+                            if (countdownTextView != null) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        countdownTextView.setText(timeLeft.toString());
+                                        countdownTextView.setVisibility(View.VISIBLE);
+                                    }
+                                });
+                            }
+                        } else {
+                            if (countdownTextView != null) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        countdownTextView.setVisibility(View.GONE);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
     }
 }

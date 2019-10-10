@@ -192,4 +192,9 @@ public class EventsActivity extends KioskActivity implements MeetupRepository.Ne
         homeButton.setClickable(clickable);
         todayButton.setClickable(clickable);
     }
+
+    @Override
+    protected long getNoInteractionTimeout() {
+        return 120;
+    }
 }
