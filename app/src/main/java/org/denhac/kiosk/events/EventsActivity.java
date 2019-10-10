@@ -197,4 +197,9 @@ public class EventsActivity extends KioskActivity implements MeetupRepository.Ne
     protected long getNoInteractionTimeout() {
         return 120;
     }
+
+    @Override
+    protected boolean shouldAllowActivityExit() {
+        return true;
+    }
 }

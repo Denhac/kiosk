@@ -340,4 +340,9 @@ public class WebViewActivity extends KioskActivity implements WebAppInterface.Ca
     protected long getNoInteractionTimeout() {
         return 60;
     }
+
+    @Override
+    protected boolean shouldAllowActivityExit() {
+        return true;
+    }
 }

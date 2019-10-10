@@ -80,6 +80,13 @@ public class MainActivity extends KioskActivity {
     protected long getNoInteractionTimeout() {
         // Really, we never want this activity to exit. Hopefully this is long enough but a bunch of
         // engineers were wrong before about how long their code would last and then we got Y2K.
+        // Note: shouldAllowActivityExit being false should make this not matter, but I still like
+        // the comment so it stays
         return Long.MAX_VALUE - 1;
+    }
+
+    @Override
+    protected boolean shouldAllowActivityExit() {
+        return false;
     }
 }

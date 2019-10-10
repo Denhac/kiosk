@@ -27,6 +27,12 @@ public abstract class KioskActivity extends AppCompatActivity {
     private TextView countdownTextView;
     private Disposable timerDisposable;
 
+
+    protected abstract long getNoInteractionTimeout();
+
+    protected abstract boolean shouldAllowActivityExit();
+
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
@@ -71,6 +77,13 @@ public abstract class KioskActivity extends AppCompatActivity {
 
         if (timerDisposable != null) {
             timerDisposable.dispose();
+        }
+    }
+
+    @Override
+    public void finish() {
+        if(shouldAllowActivityExit()) {
+            super.finish();
         }
     }
 
@@ -149,11 +162,13 @@ public abstract class KioskActivity extends AppCompatActivity {
         super.onUserInteraction();
     }
 
-    protected abstract long getNoInteractionTimeout();
-
     protected void resetTimer() {
         if (timerDisposable != null) {
             timerDisposable.dispose();
+        }
+
+        if(!shouldAllowActivityExit()) {
+            return;
         }
 
         timerDisposable = new CountdownTimer(getNoInteractionTimeout())
