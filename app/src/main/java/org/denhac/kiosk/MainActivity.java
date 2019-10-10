@@ -1,6 +1,8 @@
 package org.denhac.kiosk;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -15,6 +17,10 @@ public class MainActivity extends KioskActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Turn wifi on
+        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifi.setWifiEnabled(true); // true or false to activate/deactivate wifi
 
         ConstraintLayout eventsGroup = findViewById(R.id.events_group);
         eventsGroup.setOnClickListener(new View.OnClickListener() {
