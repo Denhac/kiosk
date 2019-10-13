@@ -16,4 +16,7 @@ public interface MeetupService {
 
     @GET("{group}/events/{id}/rsvps")
     Single<List<EventRSVP>> eventAttendees(@Path("group") String groupName, @Path("id") String eventId);
+
+    @GET("{group}/events/{id}")
+    Single<Event> event(@Path("group") String groupName, @Path("id") String eventId);
 }

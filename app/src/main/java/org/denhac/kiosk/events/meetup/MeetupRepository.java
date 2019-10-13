@@ -159,6 +159,11 @@ public class MeetupRepository {
         return singleSubject;
     }
 
+    public Single<Event> fetchEvent(String eventId) {
+        return service.event(DENHAC_HACKERSPACE, eventId)
+                .subscribeOn(Schedulers.io());
+    }
+
     public interface NetworkStatus {
         void notifyStatus(boolean online);
     }

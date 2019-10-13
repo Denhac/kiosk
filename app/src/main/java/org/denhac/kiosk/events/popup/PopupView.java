@@ -35,6 +35,7 @@ public class PopupView extends ConstraintLayout implements PopupWindow {
     private Callback callback;
 
     private Disposable fetchAttendeesDisposable;
+    private Disposable fetchEventInfoDisposable;
     private Event currentEvent;
 
     public PopupView(Context context) {
@@ -84,8 +85,7 @@ public class PopupView extends ConstraintLayout implements PopupWindow {
         currentEvent = event;
         popupEventTitle.setText(event.getName());
 
-        String description = Html.fromHtml(event.getDescription()).toString();
-        popupEventDescription.setText(description);
+        updateDescription(event.getDescription());
 
         hostListView.getAttendeeAdapter().clear();
         attendeeListView.getAttendeeAdapter().clear();
@@ -95,6 +95,13 @@ public class PopupView extends ConstraintLayout implements PopupWindow {
         popupView.setVisibility(View.VISIBLE);
 
         this.callback.onOpen();
+    }
+
+    private void updateDescription(String newDescription) {
+        String htmlRemovedDescription = Html.fromHtml(newDescription).toString();
+        if(popupEventDescription.getText() != htmlRemovedDescription) {
+            popupEventDescription.setText(htmlRemovedDescription);
+        }
     }
 
     public void update() {
@@ -129,8 +136,31 @@ public class PopupView extends ConstraintLayout implements PopupWindow {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) {
-                        Log.e("EXCEPTION", "some exception", throwable);
-                        Log.i("MESSAGE", ((HttpException) throwable).response().raw().request().url().toString());
+                        Log.e("EXCEPTION", "Exception while fetching attendees", throwable);
+                        Log.i("EXCEPTION_MESSAGE", ((HttpException) throwable).response().raw().request().url().toString());
+                    }
+                });
+
+        if (fetchEventInfoDisposable != null) {
+            fetchEventInfoDisposable.dispose();
+        }
+
+        fetchEventInfoDisposable = meetupRepository.fetchEvent(currentEvent.getId())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Event>() {
+                    @Override
+                    public void accept(Event event) {
+                        if (popupEventTitle.getText() != event.getName()) {
+                            popupEventTitle.setText(event.getName());
+                        }
+
+                        updateDescription(event.getDescription());
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) {
+                        Log.e("EXCEPTION", "Exception while fetching event info", throwable);
+                        Log.i("EXCEPTION_MESSAGE", ((HttpException) throwable).response().raw().request().url().toString());
                     }
                 });
     }
