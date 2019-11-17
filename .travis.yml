@@ -9,7 +9,7 @@ before_install:
   -in keystore.jks.enc -out keystore.jks -d
 script: "./gradlew assembleRelease"
 after_script:
-  - ls
+  - ls app/build/outputs/apk/release
   - pwd
 deploy:
   provider: releases
