@@ -12,6 +12,7 @@ deploy:
   provider: releases
   api_key:
     secure: Vuf9gvGmL/mHG0Nvq6uZ2a1R9oTutpL3JA8SPwqmUy99anHJ8CWPfhjZW6HfEtvbGTIZxaQG9WTxgLQLbdeY7t8cQZg1btSftYmSQFb++HoS5nOeiwaltPDRpwRz65GGk/vz1DZfL2zNwTlMD/RUX9KYoPF+X2wJqK04Tbwa+IdXkyjN7LmN5ziq7XRTKIAtZ+3l13UAaw8aZKxi6JI/nwBrV+eYds8kPqniu1zZWW7/bcylWPdodSoQCFoSLoBlWxOMqghbQ+BYhMrGoX7iOvfzY40PSZhXJVCGM0rWTVs7CZg1NwBT6p65VD4VhyLWi35nBSuioaNSkBjiyxLAUZ26qYr8EvUlvAVIa9f4clOC9/Z85MEazb500PPpHzTKaXHpSyzoJXcMTLNc+x9Q9Mv7wESlnxL2HF0UdC+J5HqxOUc5CZ+9DzzW2OKyqK3B4wiSpUaYgDiPJPR5eifWZkfQqL4sdXMd4EKH7zqgASIZvaQvApeEk0vibf6ThIGgpivcMtiREnydtVEutElbWhEYSvfVDzJO25jXV9ZEl24nNF7gD8AcHxFSVoQIOlO3eRbsgzhkqBMZivOiB2r8C4apTVuPNDNd55pR4q/uThNz2882ss3pPVBk3o7ELvzsh1kalwbHEphN0PoqP/4r8HEqo1SnT5pqWiDg5p+4T9s=
+  file_glob: true
   file: app/build/outputs/apk/release/*.apk
   on:
     repo: Denhac/kiosk
